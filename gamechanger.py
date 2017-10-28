@@ -52,7 +52,7 @@ def post_slack(slack_chan, slack_msg):
             attachments=[])
 
     except Exception as e:
-        print("Error: " % (str(e)))
+        print("Slack Error: " % (str(e)))
 
 if __name__ == '__main__':
     mm_id = "1691502835"
