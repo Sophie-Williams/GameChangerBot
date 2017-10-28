@@ -1,1 +1,2 @@
-config/*
+botconfig.py
+praw.ini
