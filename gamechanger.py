@@ -8,8 +8,7 @@ from time import sleep
 import dataset
 import re
 import praw
-import twittercfg as cfg
+import botconfig as cfg
+import slacker
 from sqlalchemy.exc import ProgrammingError
-
-
 
