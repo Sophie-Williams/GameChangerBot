@@ -27,6 +27,18 @@ class StdOutListener(StreamListener):
         if status_code == 420:
             return False
 
+def start_stream(t_id):
+    listen = StdOutListener()
+    auth = OAuthHandler(cfg.twitter_creds['consumer_key'], cfg.twitter_creds['consumer_secret'])
+    auth.set_access_token(cfg.twitter_creds['access_token'], cfg.twitter_creds['access_token_secret'])
+
+    try:
+        stream = Stream(auth, listen)
+        stream.filter(follow=[t_id])
+    except Exception as e:
+        print("Could not initiate Twitter stream for %s: %s" % (str(t_id)), str(e))
+
+
 def post_slack(slack_chan, slack_msg):
     try:
         token = cfg.slack_creds['api_token']
@@ -39,19 +51,8 @@ def post_slack(slack_chan, slack_msg):
             link_names=True,
             attachments=[])
 
-    except KeyError, ex:
-        print('Environment variable %s not set.' % str(ex))
-
-def start_stream(t_id):
-    listen = StdOutListener()
-    auth = OAuthHandler(cfg.twitter_creds['consumer_key'], cfg.twitter_creds['consumer_secret'])
-    auth.set_access_token(cfg.twitter_creds['access_token'], cfg.twitter_creds['access_token_secret'])
-
-    try:
-        stream = Stream(auth, listen)
-        stream.filter(follow=[t_id])
     except Exception as e:
-        print("Could not initiate Twitter stream for %s: %s" % (str(t_id)), str(e))
+        print("Error: " % (str(e)))
 
 if __name__ == '__main__':
     mm_id = "1691502835"
