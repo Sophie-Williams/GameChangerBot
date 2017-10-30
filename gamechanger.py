@@ -13,6 +13,8 @@ import re
 import praw
 from config import definitions as define
 from config import botconfig as cfg
+from bs4 import BeautifulSoup
+from selenium import webdriver
 
 
 class StdOutListener(StreamListener):
@@ -64,6 +66,7 @@ def tweet_is_relevant(t_content):
     else:
         return False
 
+
 def post_slack(slack_chan, slack_msg):
     try:
         token = cfg.slack_creds['api_token']
@@ -77,7 +80,7 @@ def post_slack(slack_chan, slack_msg):
             attachments=[])
 
     except Exception as e:
-        print("Slack Error: " % (str(e)))
+        print(e)
 
 
 if __name__ == '__main__':
