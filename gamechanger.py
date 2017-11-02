@@ -25,22 +25,19 @@ class StdOutListener(StreamListener):
 
         if status.user.screen_name == "EAMaddenMobile":
             slack_chan = "#maddengeneral"
-            t_context = "Madden Mobile"
         elif status.user.screen_name == "EAFIFAMOBILE":
             slack_chan = "#fifageneral"
-            t_context = "FIFA Mobile"
         elif status.user.screen_name == "EASPORTSNBA":
             if tweet_is_relevant(status.text):
                 slack_chan = "#nbageneral"
-                t_context = "NBA Live Mobile"
         else:
             slack_chan = "#easports-tweets"
+            add_history = True
 
-        t_buf = "[New tweet from %s] %s" % (status.user.screen_name, status.text)
+        t_buf = "*[New tweet from %s]*\n %s" % (status.user.screen_name, status.text)
         print(t_buf)
 
-        #post_slack(slack_chan, t_buf)
-        post_slack("#ppbutt", t_buf)
+        post_slack(slack_chan, t_buf, add_history)
 
     def on_error(self, status_code):
         if status_code == 420:
@@ -68,8 +65,7 @@ def tweet_is_relevant(t_content):
         return False
 
 
-def post_slack(slack_chan, slack_msg):
-
+def post_slack(slack_chan, slack_msg, add_history=False):
 
         obj = slack.chat.post_message(
             channel=slack_chan,
@@ -81,11 +77,15 @@ def post_slack(slack_chan, slack_msg):
         o_ts = obj.__dict__['body']['ts']
         o_chan = obj.__dict__['body']['channel']
 
-        slack_history[o_ts] = o_chan
+        if add_history:
+            slack_history[o_ts] = o_chan
 
-        if len(slack_history) > 2:
-            trim_channel(slack_history.values()[0], slack_history.keys()[0])
-            del slack_history[slack_history.keys()[0]]
+            if len(slack_history) > 200:
+                while True:
+                    trim_channel(slack_history.values()[0], slack_history.keys()[0])
+                    del slack_history[slack_history.keys()[0]]
+                    if len(slack_history) <= 200:
+                        break
 
 
 def trim_channel(slack_chan, slack_timestamp):
@@ -95,14 +95,13 @@ if __name__ == '__main__':
     mm_id = "1691502835"
     nbalm_id = "46172768"
     fifa_id = "3009573404"
+    slack_history = OrderedDict()
 
     try:
         token = cfg.slack_creds['api_token']
         slack = Slacker(token)
     except Exception as e:
         print(e)
-
-    slack_history = OrderedDict()
 
     print("[Twitter] Starting Madden Twitter stream monitor ...")
     madden_tweet = Thread(target=start_stream, args = [mm_id])
